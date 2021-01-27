@@ -11,7 +11,8 @@ class App extends React.Component{
             todos:[{text:"rafay" , edit: false }],
             // todos:[],
             value:'',
-            key : firebase.database().ref("todos").push().key
+            
+            // key : firebase.database().ref("todos").push().key
         }
     }
     // Add items in todo list //
@@ -30,13 +31,15 @@ class App extends React.Component{
         // const previousTodos = this.state.todos;
         firebase.database().ref('todos').on("child_added",data =>{
             this.state.todos.push({
-                // id : data.key,
+                id : data.key,
                 text:data.val().text,
-                // completed : false
+                completed : false
+
             })
             this.setState({
                 todos:this.state.todos
             })
+            // console.log();
             // console.log(data.val());
             // firebase.database().ref('todos').on('child_removed',data=>{
             //     for(var i=0 ; i<this.state.todos.length ; i++){
@@ -51,13 +54,13 @@ class App extends React.Component{
         })
     }
     // delete items from todo list //
-    delete_item =(index)=>{
+    delete_item =(index,value)=>{
         // let key = firebase.database().ref('todos').push().key;
         this.state.todos.splice(index,1);
         this.setState({
             todos:this.state.todos
         })
-        // firebase.database().ref("todos").child(this.state.todos[]).remove();
+        firebase.database().ref("todos").child(value.id).remove();
     }
     // edit items from todo list //
 
@@ -93,13 +96,18 @@ class App extends React.Component{
     }
     
     ///////////////// when you click on update button this function will run ////////////////////
-    update =(e,index)=>{
+    update =(e,index,value)=>{
         this.state.todos[index].edit = false;
         this.setState({
             todos:this.state.todos
         })
-        // console.log(this.state.todos[index].text);
+        // console.log(value.text);
+        firebase.database().ref('todos').child(value.id)
+        .set({
+            text:value.text
+        })
     }
+
 
     // deleteAll_item=()=>{
     //     <li>{this.props.emp}</li>
@@ -132,9 +140,9 @@ class App extends React.Component{
                             return <li className="list-group-item" key={i}>
                            {v.edit ? <input className="up-inp" onChange={(e)=>this.afterEdit(e,i)} type="text" /> : v.text}
                            {v.edit ?
-                           <button className="up-btn btn btn-outline-dark" onClick={(e)=>this.update(e,i)}>update</button>
+                           <button className="up-btn btn btn-outline-dark" onClick={(e)=>this.update(e,i,v)}>update</button>
                            :<button className="ed-btn btn btn-outline-dark" onClick={()=>this.edit_item(i,v.text)}>edit</button>}
-                           <button className="del-btn btn btn-outline-dark" onClick={()=>this.delete_item(i)}>delete</button>
+                           <button className="del-btn btn btn-outline-dark" onClick={()=>this.delete_item(i,v)}>delete</button>
                            </li>
 
                 // })
